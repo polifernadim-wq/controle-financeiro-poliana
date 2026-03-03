@@ -1,16 +1,16 @@
-Data recebimento;Pessoa;Tipo (Fixa/Variável);Descrição;Valor;Mês;Data recebimento
-05/03/2026;Poliana;Fixa;Salario;R$ 4.200,00;fev/26;05/03/2026
-05/03/2026;Poliana;Fixa;Ajuda de custo Poli;R$ 1.100,00;fev/26;05/03/2026
-26/02/2026;Lais;Fixa;Salario Prefeitura;R$ 2.400,00;fev/26;01/03/2026
-05/03/2026;Lais;Fixa;Salario  Tutoria;R$ 600,00;fev/26;05/03/2026
-05/03/2026;Lais;Variável;Passagens Sofia ;R$ 140,00;fev/26;05/03/2026
-03/03/2026;Poliana;Variável;Troco Anterior;R$ 911,00;fev/26;03/03/2026
-21/02/2026;Poliana;Variável;Rendimentos Jan;R$ 88,97;fev/26;21/02/2026
-03/03/2026;Poliana;Variável;Rendimentos Fev;R$ 48,19;fev/26;03/03/2026
-19/02/2026;Poliana;Variável;Ação Coletiva;R$ 633,00;fev/26;19/02/2026
-19/02/2026;Poliana;Variável;Receitas blablacar;R$ 40,00;fev/26;19/02/2026
-19/02/2026;Poliana;Variável;Receitas Ayumi Guaratuba;R$ 202,40;fev/26;19/02/2026
-01/03/2026;Poliana;Variável;Receitas Morgana Guaratuba;R$ 282,00;fev/26;01/03/2026
-19/02/2026;Poliana;Variável;Receitas Amanda Guaratuba;R$ 332,80;fev/26;19/02/2026
-19/02/2026;Poliana;Variável;FGTS;R$ 500,00;fev/26;19/02/2026
-19/02/2026;Lais;Variável;FGTS;R$ 733,41;fev/26;19/02/2026
+Data recebimento;Pessoa;Tipo (Fixa/Variável);Descrição;Valor;Mês
+05/03/2026;Poliana;Fixa;Salario;R$ 4.200,00;fev/26
+05/03/2026;Poliana;Fixa;Ajuda de custo Poli;R$ 1.100,00;fev/26
+26/02/2026;Lais;Fixa;Salario Prefeitura;R$ 2.400,00;fev/26
+05/03/2026;Lais;Fixa;Salario  Tutoria;R$ 600,00;fev/26
+05/03/2026;Lais;Variável;Passagens Sofia ;R$ 140,00;fev/26
+03/03/2026;Poliana;Variável;Troco Anterior;R$ 911,00;fev/26
+21/02/2026;Poliana;Variável;Rendimentos Jan;R$ 88,97;fev/26
+03/03/2026;Poliana;Variável;Rendimentos Fev;R$ 48,19;fev/26
+19/02/2026;Poliana;Variável;Ação Coletiva;R$ 633,00;fev/26
+19/02/2026;Poliana;Variável;Receitas blablacar;R$ 40,00;fev/26
+19/02/2026;Poliana;Variável;Receitas Ayumi Guaratuba;R$ 202,40;fev/26
+01/03/2026;Poliana;Variável;Receitas Morgana Guaratuba;R$ 282,00;fev/26
+19/02/2026;Poliana;Variável;Receitas Amanda Guaratuba;R$ 332,80;fev/26
+19/02/2026;Poliana;Variável;FGTS;R$ 500,00;fev/26
+19/02/2026;Lais;Variável;FGTS;R$ 733,41;fev/26
