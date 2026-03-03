@@ -9,24 +9,51 @@ st.set_page_config(page_title="Controle Financeiro Poliana", layout="wide")
 def carregar_csv(nome):
     if os.path.exists(nome):
         try:
-            return pd.read_csv(nome, encoding="utf-8")
+            df = pd.read_csv(nome, encoding="utf-8")
         except:
-            return pd.read_csv(nome, encoding="latin-1")
+            df = pd.read_csv(nome, encoding="latin-1")
+        
+        df.columns = df.columns.str.strip()
+        return df
     else:
         return pd.DataFrame()
+
+# ----------- CARREGAR ARQUIVOS -----------
 
 despesas = carregar_csv("despesas_cartao.csv")
 receitas = carregar_csv("receitas.csv")
 
-# ----------- TRATAMENTO DE DATAS -----------
+# ----------- TRATAMENTO DE DADOS -----------
 
 if not despesas.empty:
-    despesas["Data da Compra"] = pd.to_datetime(despesas["Data da Compra"], dayfirst=True)
-    despesas["Vencimento"] = pd.to_datetime(despesas["Vencimento"], dayfirst=True)
+    despesas["Data da Compra"] = pd.to_datetime(despesas["Data da Compra"], dayfirst=True, errors="coerce")
+    despesas["Vencimento"] = pd.to_datetime(despesas["Vencimento"], dayfirst=True, errors="coerce")
+    
+    # Garantir que valor é numérico
+    despesas["Valor Parcela"] = (
+        despesas["Valor Parcela"]
+        .astype(str)
+        .str.replace("R$", "", regex=False)
+        .str.replace(".", "", regex=False)
+        .str.replace(",", ".", regex=False)
+    )
+    despesas["Valor Parcela"] = pd.to_numeric(despesas["Valor Parcela"], errors="coerce")
+    
+    despesas["Pago?"] = despesas["Pago?"].astype(str).str.upper().str.strip()
     despesas["Mes_Vencimento"] = despesas["Vencimento"].dt.to_period("M").astype(str)
 
 if not receitas.empty:
-    receitas["Data recebimento"] = pd.to_datetime(receitas["Data recebimento"], dayfirst=True)
+    receitas["Data recebimento"] = pd.to_datetime(receitas["Data recebimento"], dayfirst=True, errors="coerce")
+    
+    receitas["Valor"] = (
+        receitas["Valor"]
+        .astype(str)
+        .str.replace("R$", "", regex=False)
+        .str.replace(".", "", regex=False)
+        .str.replace(",", ".", regex=False)
+    )
+    receitas["Valor"] = pd.to_numeric(receitas["Valor"], errors="coerce")
+    
     receitas["Mes_Receita"] = receitas["Data recebimento"].dt.to_period("M").astype(str)
 
 # ----------- TÍTULO -----------
@@ -38,10 +65,10 @@ st.title("💰 Dashboard Financeiro Estratégico")
 meses = []
 
 if not despesas.empty:
-    meses += despesas["Mes_Vencimento"].unique().tolist()
+    meses += despesas["Mes_Vencimento"].dropna().unique().tolist()
 
 if not receitas.empty:
-    meses += receitas["Mes_Receita"].unique().tolist()
+    meses += receitas["Mes_Receita"].dropna().unique().tolist()
 
 meses = sorted(list(set(meses)))
 
@@ -53,8 +80,8 @@ mes_selecionado = st.selectbox("Selecione o mês", meses)
 
 # ----------- FILTRO POR MÊS -----------
 
-despesas_mes = despesas[despesas["Mes_Vencimento"] == mes_selecionado]
-receitas_mes = receitas[receitas["Mes_Receita"] == mes_selecionado]
+despesas_mes = despesas[despesas["Mes_Vencimento"] == mes_selecionado] if not despesas.empty else pd.DataFrame()
+receitas_mes = receitas[receitas["Mes_Receita"] == mes_selecionado] if not receitas.empty else pd.DataFrame()
 
 # ----------- CÁLCULOS -----------
 
