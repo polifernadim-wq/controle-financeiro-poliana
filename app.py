@@ -8,7 +8,10 @@ st.set_page_config(page_title="Controle Financeiro Poliana", layout="wide")
 
 def carregar_csv(nome):
     if os.path.exists(nome):
-        return pd.read_csv(nome)
+        try:
+            return pd.read_csv(nome, encoding="utf-8")
+        except:
+            return pd.read_csv(nome, encoding="latin-1")
     else:
         return pd.DataFrame()
 
