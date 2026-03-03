@@ -23,6 +23,8 @@ def carregar_csv(nome):
 despesas = carregar_csv("despesas_cartao.csv")
 receitas = carregar_csv("receitas.csv")
 
+st.write("Colunas despesas:", despesas.columns)
+
 # ----------- TRATAMENTO DE DADOS -----------
 
 if not despesas.empty:
