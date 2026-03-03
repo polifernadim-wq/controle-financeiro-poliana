@@ -1,60 +1,101 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
+import os
 
-st.set_page_config(page_title="Controle Financeiro", layout="wide")
+st.set_page_config(page_title="Controle Financeiro Poliana", layout="wide")
 
-st.title("💰 Controle Financeiro - Poliana")
+# ----------- FUNÇÃO PARA CARREGAR CSV -----------
 
-if "dados" not in st.session_state:
-    st.session_state.dados = pd.DataFrame(columns=[
-        "Data", "Tipo", "Categoria", "Descrição", "Valor"
-    ])
+def carregar_csv(nome):
+    if os.path.exists(nome):
+        return pd.read_csv(nome)
+    else:
+        return pd.DataFrame()
 
-with st.sidebar:
-    st.header("➕ Novo Lançamento")
-    data = st.date_input("Data", datetime.today())
-    tipo = st.selectbox("Tipo", ["Receita", "Despesa"])
-    categoria = st.text_input("Categoria")
-    descricao = st.text_input("Descrição")
-    valor = st.number_input("Valor", min_value=0.0, format="%.2f")
+despesas = carregar_csv("despesas_cartao.csv")
+receitas = carregar_csv("receitas.csv")
 
-    if st.button("Adicionar"):
-        novo = pd.DataFrame([[data, tipo, categoria, descricao, valor]],
-                            columns=st.session_state.dados.columns)
-        st.session_state.dados = pd.concat([st.session_state.dados, novo], ignore_index=True)
-        st.success("Lançamento adicionado!")
+# ----------- TRATAMENTO DE DATAS -----------
 
-st.subheader("📋 Lançamentos")
-st.dataframe(st.session_state.dados, use_container_width=True)
+if not despesas.empty:
+    despesas["Data da Compra"] = pd.to_datetime(despesas["Data da Compra"], dayfirst=True)
+    despesas["Vencimento"] = pd.to_datetime(despesas["Vencimento"], dayfirst=True)
+    despesas["Mes_Vencimento"] = despesas["Vencimento"].dt.to_period("M").astype(str)
 
-st.subheader("📊 Resumo")
+if not receitas.empty:
+    receitas["Data recebimento"] = pd.to_datetime(receitas["Data recebimento"], dayfirst=True)
+    receitas["Mes_Receita"] = receitas["Data recebimento"].dt.to_period("M").astype(str)
 
-if not st.session_state.dados.empty:
-    total_receitas = st.session_state.dados[
-        st.session_state.dados["Tipo"] == "Receita"
-    ]["Valor"].sum()
+# ----------- TÍTULO -----------
 
-    total_despesas = st.session_state.dados[
-        st.session_state.dados["Tipo"] == "Despesa"
-    ]["Valor"].sum()
+st.title("💰 Dashboard Financeiro Estratégico")
 
-    saldo = total_receitas - total_despesas
+# ----------- LISTA DE MESES -----------
 
-    col1, col2, col3 = st.columns(3)
+meses = []
 
-    col1.metric("Total Receitas", f"R$ {total_receitas:,.2f}")
-    col2.metric("Total Despesas", f"R$ {total_despesas:,.2f}")
-    col3.metric("Saldo", f"R$ {saldo:,.2f}")
+if not despesas.empty:
+    meses += despesas["Mes_Vencimento"].unique().tolist()
 
-    st.subheader("📂 Despesas por Categoria")
+if not receitas.empty:
+    meses += receitas["Mes_Receita"].unique().tolist()
 
-    despesas = st.session_state.dados[
-        st.session_state.dados["Tipo"] == "Despesa"
-    ]
+meses = sorted(list(set(meses)))
 
-    if not despesas.empty:
-        resumo_categoria = despesas.groupby("Categoria")["Valor"].sum()
-        st.bar_chart(resumo_categoria)
-else:
-    st.info("Adicione lançamentos para visualizar o resumo.")
+if not meses:
+    st.warning("Nenhum dado encontrado nos arquivos.")
+    st.stop()
+
+mes_selecionado = st.selectbox("Selecione o mês", meses)
+
+# ----------- FILTRO POR MÊS -----------
+
+despesas_mes = despesas[despesas["Mes_Vencimento"] == mes_selecionado]
+receitas_mes = receitas[receitas["Mes_Receita"] == mes_selecionado]
+
+# ----------- CÁLCULOS -----------
+
+total_receitas = receitas_mes["Valor"].sum() if not receitas_mes.empty else 0
+total_fatura = despesas_mes["Valor Parcela"].sum() if not despesas_mes.empty else 0
+
+total_pago = despesas_mes[despesas_mes["Pago?"] == "SIM"]["Valor Parcela"].sum() if not despesas_mes.empty else 0
+total_aberto = despesas_mes[despesas_mes["Pago?"] == "NÃO"]["Valor Parcela"].sum() if not despesas_mes.empty else 0
+
+saldo_mes = total_receitas - total_fatura
+
+# ----------- DASHBOARD -----------
+
+col1, col2, col3 = st.columns(3)
+
+col1.metric("Receitas no mês", f"R$ {total_receitas:,.2f}")
+col2.metric("Total Fatura", f"R$ {total_fatura:,.2f}")
+col3.metric("Saldo do mês", f"R$ {saldo_mes:,.2f}")
+
+col4, col5 = st.columns(2)
+
+col4.metric("Já Pago", f"R$ {total_pago:,.2f}")
+col5.metric("Em Aberto", f"R$ {total_aberto:,.2f}")
+
+# ----------- FIXO X VARIÁVEL -----------
+
+st.subheader("Fixo x Variável")
+
+if not despesas_mes.empty:
+    resumo_tipo = despesas_mes.groupby("Fixo/Variável")["Valor Parcela"].sum()
+    st.bar_chart(resumo_tipo)
+
+# ----------- FATURA POR CARTÃO -----------
+
+st.subheader("Fatura por Cartão")
+
+if not despesas_mes.empty:
+    resumo_cartao = despesas_mes.groupby("Cartão")["Valor Parcela"].sum()
+    st.bar_chart(resumo_cartao)
+
+# ----------- TABELAS -----------
+
+st.subheader("Despesas do mês")
+st.dataframe(despesas_mes)
+
+st.subheader("Receitas do mês")
+st.dataframe(receitas_mes)
